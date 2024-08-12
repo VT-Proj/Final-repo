@@ -11,8 +11,6 @@ def home(request):
 
 def login_view(request):
     if request.method == "POST":
-        # username = request.POST['username']
-        # password = request.POST['password']
         username=request.POST.get('username')
         password=request.POST.get('password')
         user = authenticate(request, username=username, password=password)
@@ -47,7 +45,6 @@ def signup(request):
                 return redirect('signup')
             else:
                 myuser = User.objects.create_user(username=username, email=email, password=password)
-                # myuser.profile.employee_id = employee_id
                 myuser.save()
                 messages.success(request, "Your account has been registered successfully.")
                 print("User created successfully.")
