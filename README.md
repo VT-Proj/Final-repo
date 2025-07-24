@@ -1,4 +1,4 @@
-# Automated Visual Inspection of Digital Meter Reading
+# Visual Inspection of Electric Meter Reading Using Image Processing
 
 Project Overview :
 This project develops an automated visual inspection system for electric meter reading using traditional image processing techniques and the YOLOv8 object detection model. The system aims to enhance the accuracy and efficiency of meter reading, reducing the need for manual labor and associated costs.
