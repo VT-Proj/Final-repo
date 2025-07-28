@@ -1,0 +1,20 @@
+databases:
+  - name: mysitedb
+    plan: free
+    databaseName: mysite
+    user: mysite
+services:
+  - type: web
+    name: django-asgi-app
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn vtproj.asgi:application -k uvicorn.workers.UvicornWorker"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: vtproj.settings
+      - key: SECRET_KEY
+        value: django-insecure-e^zk$j73#(*h!(@v3m%cfqrc_($s2b$hgym0&_p_$bt+)cs&_&
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "sailproj.com,render.com"
