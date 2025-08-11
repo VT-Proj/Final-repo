@@ -1,17 +1,14 @@
-import os
-import torch
-import cv2
-from django.core.files.storage import FileSystemStorage
 from django.shortcuts import redirect, render
-from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import get_user_model
 from .forms import ImageForm
 from .models import Image
-from ultralytics import YOLO
+from .image_processing_service import ImageProcessingService
 
-model=YOLO('model_detection/yolov8n.pt')
+# Initialize the image processing service
+# image_processor = ImageProcessingService('model_detection/yolov8n.pt')
+image_processor = ImageProcessingService('model_detection/detect/train/weights/best.pt')
 
 def home(request):
     return render(request, "authenticate/home.html")
@@ -85,28 +82,22 @@ def uploadimg(request):
     if request.method == "POST":
         form = ImageForm(request.POST, request.FILES)
         if form.is_valid():
-            image_instance = form.save()  # Save the uploaded image
-            
-            # Get the file path of the uploaded image
-            img_path = image_instance.image.path
+            image_instance = form.save()
 
-            # Run YOLOv8 model on the uploaded image
-            results = model(img_path)  # YOLOv8 automatically processes the image
-            
-            # Parse the results (bounding boxes, labels, etc.)
-            predictions = results[0].boxes.xyxy.cpu().numpy()  # Bounding box coordinates
-            class_names = results[0].names  # Class names
-            confidences = results[0].boxes.conf.cpu().numpy()  # Confidence scores
+            # Correct field name is 'photo' per models.Image
+            img_path = image_instance.photo.path
 
-            # Add predictions and image path to context for rendering
+            # Run full traditional + ML pipeline
+            pipeline = image_processor.process_complete_pipeline(img_path)
+
             img = Image.objects.all().order_by('-date')
             return render(request, "authenticate/uploadimg.html", {
-                'img': img, 
-                'form': form, 
-                'predictions': zip(predictions, confidences, class_names),
-                'image_url': image_instance.image.url  # For displaying the image
+                'img': img,
+                'form': ImageForm(),
+                'pipeline': pipeline,
+                'image_url': image_instance.photo.url,
             })
-    
+
     form = ImageForm()
     img = Image.objects.all().order_by('-date')
     return render(request, "authenticate/uploadimg.html", {'img': img, 'form': form})

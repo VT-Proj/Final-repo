@@ -122,6 +122,96 @@
         </div>
       </form>
     </div>
+
+    {% if pipeline %}
+    <div class="mb-5">
+      <h3 class="mb-3">Results</h3>
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Original</h5>
+              <img src="{{ pipeline.original_image }}" class="img-fluid" alt="Original"/>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h5 class="card-title">Detection</h5>
+              <img src="{{ pipeline.detection_image }}" class="img-fluid" alt="Detections"/>
+              {% if pipeline.meter_reading %}
+              <div class="mt-3">
+                <p class="mb-1"><strong>Meter Reading:</strong> {{ pipeline.meter_reading.reading|default:"N/A" }}</p>
+                <p class="mb-1"><strong>Confidence:</strong> {{ pipeline.meter_reading.confidence|floatformat:2 }}</p>
+                {% if pipeline.meter_reading.crop_image %}
+                  <div class="mt-2">
+                    <h6 class="mb-2">Cropped Display</h6>
+                    <img src="{{ pipeline.meter_reading.crop_image }}" class="img-fluid" alt="Display Crop"/>
+                  </div>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if pipeline.detections and pipeline.detections|length %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">Detections</h5>
+          <ul class="mb-0">
+            {% for det in pipeline.detections %}
+              <li><strong>{{ det.class_name }}</strong> — {{ det.confidence|floatformat:2 }} (bbox: {{ det.bbox }})</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if pipeline.preprocessing %}
+      <div class="mb-4">
+        <h5 class="mb-3">Preprocessing</h5>
+        <div class="row">
+          {% for name, img64 in pipeline.preprocessing.items %}
+          <div class="col-md-4 mb-4">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h6 class="card-title text-capitalize">{{ name|cut:"_"|title }}</h6>
+                <img src="{{ img64 }}" class="img-fluid" alt="{{ name }}"/>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if pipeline.postprocessing %}
+      <div class="mb-4">
+        <h5 class="mb-3">Postprocessing</h5>
+        {% if pipeline.postprocessing.contour_count %}
+        <p><strong>Contour count:</strong> {{ pipeline.postprocessing.contour_count }}</p>
+        {% endif %}
+        <div class="row">
+          {% for name, img64 in pipeline.postprocessing.items %}
+            {% if name != 'contour_count' %}
+            <div class="col-md-4 mb-4">
+              <div class="card h-100">
+                <div class="card-body text-center">
+                  <h6 class="card-title text-capitalize">{{ name|cut:"_"|title }}</h6>
+                  <img src="{{ img64 }}" class="img-fluid" alt="{{ name }}"/>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
     <div class="row">
       {% for x in img %}
         <div class="col-sm-4 mb-4">
